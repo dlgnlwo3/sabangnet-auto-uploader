@@ -13,6 +13,9 @@ class GUIDto:
         self.__sabangnet_pw = ""
         self.__target_date_list = []
 
+        # 등록 송신 시 [11번가, 위메프], [일반 쇼핑몰]인지 확인하는 부분
+        self.__is_eleven = bool
+
     @property
     def google_sheet_url(self):  # getter
         return self.__google_sheet_url
@@ -52,6 +55,14 @@ class GUIDto:
     @target_date_list.setter
     def target_date_list(self, value):  # setter
         self.__target_date_list = value
+
+    @property
+    def is_eleven(self):  # getter
+        return self.__is_eleven
+
+    @is_eleven.setter
+    def is_eleven(self, value):  # setter
+        self.__is_eleven = value
 
     def to_print(self):
         print("google_sheet_url: ", self.google_sheet_url)

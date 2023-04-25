@@ -49,6 +49,16 @@ class SabangnetRegistUploadTab(QWidget):
 
     # 시작 클릭
     def regist_upload_start_button_clicked(self):
+        # sender()를 이용하여 어떤 버튼이 호출했는지 확인
+        button = self.sender()
+
+        if button == self.eleven_regist_upload_start_button:
+            print("11번가, 위메프")
+            is_eleven = True
+        elif button == self.regist_upload_start_button:
+            print("일반 쇼핑몰")
+            is_eleven = False
+
         self.config = Config()
         __saved_data = self.config.get_data()
         self.saved_data = self.config.dict_to_data(__saved_data)
@@ -78,6 +88,7 @@ class SabangnetRegistUploadTab(QWidget):
         guiDto.sabangnet_id = self.saved_data.sabangnet_id
         guiDto.sabangnet_pw = self.saved_data.sabangnet_pw
         guiDto.target_date_list = selected_date_list
+        guiDto.is_eleven = is_eleven
 
         self.regist_upload_thread = SabangnetRegistUploadThread()
         self.regist_upload_thread.log_msg.connect(self.log_append)
@@ -86,6 +97,8 @@ class SabangnetRegistUploadTab(QWidget):
 
         self.regist_upload_start_button.setDisabled(True)
         self.regist_upload_stop_button.setDisabled(False)
+        self.eleven_regist_upload_start_button.setDisabled(True)
+        self.eleven_regist_upload_stop_button.setDisabled(False)
         self.regist_upload_thread.start()
 
     # 중지 클릭
@@ -103,6 +116,8 @@ class SabangnetRegistUploadTab(QWidget):
         self.regist_upload_thread.stop()
         self.regist_upload_start_button.setDisabled(False)
         self.regist_upload_stop_button.setDisabled(True)
+        self.eleven_regist_upload_start_button.setDisabled(False)
+        self.eleven_regist_upload_stop_button.setDisabled(True)
         print(f"thread_is_running: {self.regist_upload_thread.isRunning()}")
 
     def add_date_button_clicked(self):
@@ -161,8 +176,22 @@ class SabangnetRegistUploadTab(QWidget):
         browser_inner_layout.addWidget(self.chrome_browser_button)
         chrome_browser_groupbox.setLayout(browser_inner_layout)
 
-        # 시작 중지
-        start_stop_groupbox = QGroupBox("시작 중지")
+        # 11번가, 위메프
+        eleven_start_stop_groupbox = QGroupBox("11번가, 위메프")
+        self.eleven_regist_upload_start_button = QPushButton("시작")
+        self.eleven_regist_upload_stop_button = QPushButton("중지")
+        self.eleven_regist_upload_stop_button.setDisabled(True)
+
+        self.eleven_regist_upload_start_button.clicked.connect(self.regist_upload_start_button_clicked)
+        self.eleven_regist_upload_stop_button.clicked.connect(self.regist_upload_stop_button_clicked)
+
+        eleven_start_stop_inner_layout = QHBoxLayout()
+        eleven_start_stop_inner_layout.addWidget(self.eleven_regist_upload_start_button)
+        eleven_start_stop_inner_layout.addWidget(self.eleven_regist_upload_stop_button)
+        eleven_start_stop_groupbox.setLayout(eleven_start_stop_inner_layout)
+
+        # 일반 쇼핑몰
+        start_stop_groupbox = QGroupBox("일반 쇼핑몰")
         self.regist_upload_start_button = QPushButton("시작")
         self.regist_upload_stop_button = QPushButton("중지")
         self.regist_upload_stop_button.setDisabled(True)
@@ -198,7 +227,8 @@ class SabangnetRegistUploadTab(QWidget):
 
         bottom_layout = QHBoxLayout()
         bottom_layout.addStretch(5)
-        bottom_layout.addWidget(chrome_browser_groupbox, 2)
+        # bottom_layout.addWidget(chrome_browser_groupbox, 2)
+        bottom_layout.addWidget(eleven_start_stop_groupbox, 3)
         bottom_layout.addWidget(start_stop_groupbox, 3)
 
         log_layout = QVBoxLayout()

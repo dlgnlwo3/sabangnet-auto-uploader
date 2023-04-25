@@ -99,18 +99,32 @@ class SabangnetRegistUploadProcess:
         finally:
             driver.implicitly_wait(self.default_wait)
 
+    # 메인화면으로 이동 (반복 작업 시 필요)
+    def sabangnet_main(self):
+        driver = self.driver
+        driver.get("https://sbadmin09.sabangnet.co.kr/#/dashboard")
+        time.sleep(0.5)
+        WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, '//a[contains(@href, "dashboard")]'))
+        )
+        time.sleep(0.5)
+
     # 전체작업 시작
     def work_start(self):
         print(f"process: work_start")
 
         try:
+            # self.sabangnet_login()
+
             for target_date in self.guiDto.target_date_list:
                 self.target_date = target_date
 
-                self.sabangnet_login()
-
                 try:
                     print(f"[{self.target_date}] 작업 시작")
+
+                    # self.sabangnet_main()
+
+                    print(f"11번가, 위메프: {self.guiDto.is_eleven}")
 
                 except Exception as e:
                     print(e)
