@@ -17,6 +17,7 @@ from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest
 
 from configs.program_config import ProgramConfig as Config
 
+from tabs.sabangnet_regist_upload_tab import SabangnetRegistUploadTab
 from tabs.sabangnet_stock_setting_tab import SabangnetStockSettingTab
 from tabs.user_setting_tab import UserSettingTab
 
@@ -80,12 +81,14 @@ class MainUI(QWidget):
         self.icon.get(QNetworkRequest(QUrl(ICON_IMAGE_URL)))
 
         # 탭 초기화
+        self.sabangnet_regist_upload_tab = SabangnetRegistUploadTab()
         self.sabangnet_stock_setting_tab = SabangnetStockSettingTab()
         self.user_setting_tab = UserSettingTab()
 
         # 탭 추가
         tabs = QTabWidget()
-        tabs.addTab(self.sabangnet_stock_setting_tab, "품절설정")
+        tabs.addTab(self.sabangnet_regist_upload_tab, "등록송신")
+        tabs.addTab(self.sabangnet_stock_setting_tab, "전체품절설정")
         tabs.addTab(self.user_setting_tab, "사용자 설정")
 
         vbox = QVBoxLayout()

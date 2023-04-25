@@ -53,10 +53,8 @@ class SabangnetStockSettingProcess:
         print(f"process: work_start")
 
         df_soldout = get_gs_data(self.guiDto.google_sheet_url, self.guiDto.selected_sheet_name)
-
+        self.log_msg.emit(f"{len(df_soldout)}개의 데이터를 발견했습니다.")
         print(df_soldout)
-
-        print()
 
 
 if __name__ == "__main__":
