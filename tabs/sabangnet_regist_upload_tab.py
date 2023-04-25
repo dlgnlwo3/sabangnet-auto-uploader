@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from datetime import *
 
-from threads.sabangnet_stock_setting_thread import SabangnetStockSettingThread
+from threads.sabangnet_regist_upload_thread import SabangnetRegistUploadThread
 from dtos.gui_dto import GUIDto
 from common.utils import *
 
@@ -48,14 +48,22 @@ class SabangnetRegistUploadTab(QWidget):
         open_browser()
 
     # 시작 클릭
-    def stock_setting_start_button_clicked(self):
+    def regist_upload_start_button_clicked(self):
         self.config = Config()
         __saved_data = self.config.get_data()
         self.saved_data = self.config.dict_to_data(__saved_data)
 
-        if self.saved_data.google_sheet_url == "":
-            QMessageBox.information(self, "작업 시작", f"구글 시트 주소를 입력해주세요.")
+        selected_date_list = []
+        self.date_listwidget.selectAll()
+        if len(self.date_listwidget.selectedItems()) <= 0:
+            print(f"선택된 날짜가 없습니다.")
+            QMessageBox.information(self, "날짜 선택", f"선택된 날짜가 없습니다.")
             return
+
+        else:
+            date_list_items = self.date_listwidget.selectedItems()
+            for date_item in date_list_items:
+                selected_date_list.append(date_item.text())
 
         if self.saved_data.sabangnet_id == "":
             QMessageBox.information(self, "작업 시작", f"아이디를 입력해주세요.")
@@ -65,78 +73,50 @@ class SabangnetRegistUploadTab(QWidget):
             QMessageBox.information(self, "작업 시작", f"비밀번호를 입력해주세요.")
             return
 
-        if self.sheet_combobox.currentText() == "":
-            QMessageBox.information(self, "작업 시작", f"시트를 선택해주세요")
-            return
-        else:
-            selected_sheet_name = self.sheet_combobox.currentText()
-
         guiDto = GUIDto()
         guiDto.google_sheet_url = self.saved_data.google_sheet_url
-        guiDto.selected_sheet_name = selected_sheet_name
         guiDto.sabangnet_id = self.saved_data.sabangnet_id
         guiDto.sabangnet_pw = self.saved_data.sabangnet_pw
+        guiDto.target_date_list = selected_date_list
 
-        self.stock_setting_thread = SabangnetStockSettingThread()
-        self.stock_setting_thread.log_msg.connect(self.log_append)
-        self.stock_setting_thread.stock_setting_finished.connect(self.stock_setting_finished)
-        self.stock_setting_thread.setGuiDto(guiDto)
+        self.regist_upload_thread = SabangnetRegistUploadThread()
+        self.regist_upload_thread.log_msg.connect(self.log_append)
+        self.regist_upload_thread.regist_upload_finished.connect(self.regist_upload_finished)
+        self.regist_upload_thread.setGuiDto(guiDto)
 
-        self.stock_setting_start_button.setDisabled(True)
-        self.stock_setting_stop_button.setDisabled(False)
-        self.stock_setting_thread.start()
+        self.regist_upload_start_button.setDisabled(True)
+        self.regist_upload_stop_button.setDisabled(False)
+        self.regist_upload_thread.start()
 
     # 중지 클릭
     @pyqtSlot()
-    def stock_setting_stop_button_clicked(self):
+    def regist_upload_stop_button_clicked(self):
         print(f"search stop clicked")
         self.log_append(f"중지 클릭")
-        self.stock_setting_finished()
+        self.regist_upload_finished()
 
     # 작업 종료
     @pyqtSlot()
-    def stock_setting_finished(self):
+    def regist_upload_finished(self):
         print(f"search thread finished")
         self.log_append(f"작업 종료")
-        self.stock_setting_thread.stop()
-        self.stock_setting_start_button.setDisabled(False)
-        self.stock_setting_stop_button.setDisabled(True)
-        print(f"thread_is_running: {self.stock_setting_thread.isRunning()}")
+        self.regist_upload_thread.stop()
+        self.regist_upload_start_button.setDisabled(False)
+        self.regist_upload_stop_button.setDisabled(True)
+        print(f"thread_is_running: {self.regist_upload_thread.isRunning()}")
 
-    def set_sheet_combobox(self, sheet_list):
-        for sheet in sheet_list:
-            self.sheet_combobox.addItem(sheet)
+    def add_date_button_clicked(self):
+        target_date = self.date_edit.text()
+        print(target_date)
+        self.date_listwidget.addItem(target_date)
 
-    def sheet_search_button_clicked(self):
-        self.config = Config()
-        __saved_data = self.config.get_data()
-        self.saved_data = self.config.dict_to_data(__saved_data)
-        print(self.saved_data.google_sheet_url)
-
-        if self.saved_data.google_sheet_url == "":
-            self.log_append(f"구글 시트 주소를 입력해주세요.")
+    def remove_date_button_clicked(self):
+        print("click")
+        selected_items = self.date_listwidget.selectedItems()
+        if not selected_items:
             return
-
-        self.sheet_combobox.clear()
-
-        self.log_append(f"구글 시트 조회")
-
-        google_sheet_url = self.saved_data.google_sheet_url
-
-        try:
-            spreadsheet: gspread.Spreadsheet = get_spreadsheet(google_sheet_url)
-            worksheet_list = spreadsheet.worksheets()
-            worksheet_title_list = []
-            for worksheet in worksheet_list:
-                worksheet_title_list.append(worksheet.title)
-            self.set_sheet_combobox(worksheet_title_list)
-
-        except Exception as e:
-            print(e)
-            print(f"구글 시트 주소를 확인해주세요.")
-            self.log_append(f"구글 시트 주소를 확인해주세요.")
-            global_log_append(str(e))
-            self.sheet_combobox.clear()
+        for item in selected_items:
+            self.date_listwidget.takeItem(self.date_listwidget.row(item))
 
     # 메인 UI
     def initUI(self):
@@ -154,8 +134,8 @@ class SabangnetRegistUploadTab(QWidget):
         self.add_date_button = QPushButton("날짜 추가")
         self.remove_date_button = QPushButton("날짜 제거")
 
-        # self.add_date_button.clicked.connect(self.add_date_button_clicked)
-        # self.remove_date_button.clicked.connect(self.remove_date_button_clicked)
+        self.add_date_button.clicked.connect(self.add_date_button_clicked)
+        self.remove_date_button.clicked.connect(self.remove_date_button_clicked)
 
         date_button_inner_layout = QHBoxLayout()
         date_button_inner_layout.addWidget(self.add_date_button)
@@ -183,16 +163,16 @@ class SabangnetRegistUploadTab(QWidget):
 
         # 시작 중지
         start_stop_groupbox = QGroupBox("시작 중지")
-        self.stock_setting_start_button = QPushButton("시작")
-        self.stock_setting_stop_button = QPushButton("중지")
-        self.stock_setting_stop_button.setDisabled(True)
+        self.regist_upload_start_button = QPushButton("시작")
+        self.regist_upload_stop_button = QPushButton("중지")
+        self.regist_upload_stop_button.setDisabled(True)
 
-        self.stock_setting_start_button.clicked.connect(self.stock_setting_start_button_clicked)
-        self.stock_setting_stop_button.clicked.connect(self.stock_setting_stop_button_clicked)
+        self.regist_upload_start_button.clicked.connect(self.regist_upload_start_button_clicked)
+        self.regist_upload_stop_button.clicked.connect(self.regist_upload_stop_button_clicked)
 
         start_stop_inner_layout = QHBoxLayout()
-        start_stop_inner_layout.addWidget(self.stock_setting_start_button)
-        start_stop_inner_layout.addWidget(self.stock_setting_stop_button)
+        start_stop_inner_layout.addWidget(self.regist_upload_start_button)
+        start_stop_inner_layout.addWidget(self.regist_upload_stop_button)
         start_stop_groupbox.setLayout(start_stop_inner_layout)
 
         # 로그 그룹박스

@@ -11,6 +11,7 @@ class GUIDto:
         self.__selected_sheet_name = ""
         self.__sabangnet_id = ""
         self.__sabangnet_pw = ""
+        self.__target_date_list = []
 
     @property
     def google_sheet_url(self):  # getter
@@ -43,6 +44,14 @@ class GUIDto:
     @sabangnet_pw.setter
     def sabangnet_pw(self, value):  # setter
         self.__sabangnet_pw = value
+
+    @property
+    def target_date_list(self):  # getter
+        return self.__target_date_list
+
+    @target_date_list.setter
+    def target_date_list(self, value):  # setter
+        self.__target_date_list = value
 
     def to_print(self):
         print("google_sheet_url: ", self.google_sheet_url)
