@@ -123,59 +123,59 @@ class SabangnetRegistUploadProcess:
         print("11번가, 위메프 작업")
 
         try:
-            shop_name = StoreNameEnum.ElevenStreet.value
-            self.shop_regist_upload(shop_name)
+            store_name = StoreNameEnum.ElevenStreet.value
+            self.shop_regist_upload(store_name)
         except Exception as e:
             print(e)
-            self.log_msg.emit(f"{shop_name} 작업 실패")
+            self.log_msg.emit(f"{store_name} 작업 실패")
 
         try:
-            shop_name = StoreNameEnum.WeMakePrice.value
-            self.shop_regist_upload(shop_name)
+            store_name = StoreNameEnum.WeMakePrice.value
+            self.shop_regist_upload(store_name)
         except Exception as e:
             print(e)
-            self.log_msg.emit(f"{shop_name} 작업 실패")
+            self.log_msg.emit(f"{store_name} 작업 실패")
 
     # 일반 쇼핑몰 작업
     def shop_regist(self):
         print("일반 쇼핑몰 작업")
 
         try:
-            shop_name = StoreNameEnum.Cafe24.value
-            self.shop_regist_upload(shop_name)
+            store_name = StoreNameEnum.Cafe24.value
+            self.shop_regist_upload(store_name)
         except Exception as e:
             print(e)
-            self.log_msg.emit(f"{shop_name} 작업 실패")
+            self.log_msg.emit(f"{store_name} 작업 실패")
 
         try:
-            shop_name = StoreNameEnum.Coupang.value
-            self.shop_regist_upload(shop_name)
+            store_name = StoreNameEnum.Coupang.value
+            self.shop_regist_upload(store_name)
         except Exception as e:
             print(e)
-            self.log_msg.emit(f"{shop_name} 작업 실패")
+            self.log_msg.emit(f"{store_name} 작업 실패")
 
         try:
-            shop_name = StoreNameEnum.Grip.value
-            self.shop_regist_upload(shop_name)
+            store_name = StoreNameEnum.Grip.value
+            self.shop_regist_upload(store_name)
         except Exception as e:
             print(e)
-            self.log_msg.emit(f"{shop_name} 작업 실패")
+            self.log_msg.emit(f"{store_name} 작업 실패")
 
         try:
-            shop_name = StoreNameEnum.Brandi.value
-            self.shop_regist_upload(shop_name)
+            store_name = StoreNameEnum.Brandi.value
+            self.shop_regist_upload(store_name)
         except Exception as e:
             print(e)
-            self.log_msg.emit(f"{shop_name} 작업 실패")
+            self.log_msg.emit(f"{store_name} 작업 실패")
 
         try:
-            shop_name = StoreNameEnum.KakaoTalkStore.value
-            self.shop_regist_upload(shop_name)
+            store_name = StoreNameEnum.KakaoTalkStore.value
+            self.shop_regist_upload(store_name)
         except Exception as e:
             print(e)
-            self.log_msg.emit(f"{shop_name} 작업 실패")
+            self.log_msg.emit(f"{store_name} 작업 실패")
 
-    def shop_regist_upload(self, shop_name):
+    def shop_regist_upload(self, store_name):
         driver = self.driver
 
         self.sabangnet_regist_menu()
@@ -220,9 +220,113 @@ class SabangnetRegistUploadProcess:
             raise Exception(f"[{self.target_date}] 검색 결과를 발견하지 못했습니다.")
 
         # 쇼핑몰선택
-        shop_select = driver.find_element(By.XPATH, f'//li[./span[text()="{shop_name}"]]')
+        print(f"{store_name}")
+        shop_select = driver.find_element(By.XPATH, f'//li[./span[text()="{store_name}"]]')
         driver.execute_script("arguments[0].click();", shop_select)
         time.sleep(0.2)
+
+        # 전체선택 체크박스
+        select_all_checkbox = driver.find_element(By.XPATH, '//thead//th//input[contains(@class, "checkbox")]')
+        driver.execute_script("arguments[0].click();", select_all_checkbox)
+        time.sleep(0.2)
+
+        # 상품등록송신 클릭 -> 새 창 열림
+        regist_upload_button = driver.find_element(By.XPATH, '//button[./span[contains(text(), "상품등록송신")]]')
+        driver.execute_script("arguments[0].click();", regist_upload_button)
+        time.sleep(0.2)
+
+        try:
+            driver.switch_to.window(driver.window_handles[1])
+            self.send_regist(store_name)
+
+        except Exception as e:
+            print(e)
+            self.log_msg.emit(f"{store_name} 작업 실패 {e}")
+
+        finally:
+            # 원래 탭으로 돌아오기
+            driver.close()
+            driver.switch_to.window(driver.window_handles[0])
+            time.sleep(0.5)
+
+    # 즉시송신
+    def send_regist(self, store_name):
+        driver = self.driver
+        WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, '//div[./span[contains(text(), "상품등록 송신")]]'))
+        )
+        time.sleep(0.5)
+
+        # 쇼핑몰ID
+        # 위메프는 사용할 계정을 선택해야 함
+        if store_name == StoreNameEnum.WeMakePrice.value:
+            wemakeprice_account_checkbox = driver.find_element(
+                By.XPATH, '//label[./span[contains(text(), "cocoblanc(79459)")]]//input'
+            )
+            driver.execute_script("arguments[0].click();", wemakeprice_account_checkbox)
+            time.sleep(0.2)
+
+        # 판매가 선택
+        # 브랜디, 카카오톡 스토어
+        if store_name == StoreNameEnum.Brandi.value or store_name == StoreNameEnum.KakaoTalkStore.value:
+            use_store_sell_price = driver.find_element(
+                By.XPATH, '//label[./span[contains(text(), "쇼핑몰별 판매가에 등록된 판매가로 전송")]]//input'
+            )
+            driver.execute_script("arguments[0].click();", use_store_sell_price)
+            time.sleep(0.2)
+
+        # 카테고리 매핑선택여부
+        # 위메프를 제외한 모든 상점에서 '사방넷 카테고리 매핑적용함' 라디오버튼을 체크함
+        if store_name != StoreNameEnum.WeMakePrice.value:
+            use_sabangnet_mapping = driver.find_element(
+                By.XPATH, '//label[./span[contains(text(), "사방넷 카테고리 매핑적용함")]]//input'
+            )
+            driver.execute_script("arguments[0].click();", use_sabangnet_mapping)
+            time.sleep(0.2)
+
+        # 상세설명 선택
+        # 위메프에서는 '쇼핑몰별 상세설명에 등록된 상세설명으로 전송' 선택
+        if store_name == StoreNameEnum.WeMakePrice.value:
+            use_detail_note = driver.find_element(
+                By.XPATH, '//label[./span[contains(text(), "쇼핑몰별 상세설명에 등록된 상세설명으로 전송")]]//input'
+            )
+            driver.execute_script("arguments[0].click();", use_detail_note)
+            time.sleep(0.2)
+
+        # 쇼핑몰 부가정보
+        # 각 쇼핑몰마다 선택해야하는 라디오버튼이 다름
+        if store_name == StoreNameEnum.ElevenStreet.value:
+            store_sub_note = driver.find_element(By.XPATH, '//label[./span[./button[./span[text()="11번가"]]]]//input')
+            driver.execute_script("arguments[0].click();", store_sub_note)
+            time.sleep(0.2)
+        elif store_name == StoreNameEnum.WeMakePrice.value:
+            store_sub_note = driver.find_element(
+                By.XPATH, '//label[./span[./button[./span[text()="위메프_1번코드"]]]]//input'
+            )
+            driver.execute_script("arguments[0].click();", store_sub_note)
+            time.sleep(0.2)
+        elif store_name == StoreNameEnum.Cafe24.value:
+            store_sub_note = driver.find_element(By.XPATH, '//label[./span[./button[./span[text()="카페24"]]]]//input')
+            driver.execute_script("arguments[0].click();", store_sub_note)
+            time.sleep(0.2)
+        elif store_name == StoreNameEnum.Coupang.value:
+            store_sub_note = driver.find_element(By.XPATH, '//label[./span[./button[./span[text()="쿠팡"]]]]//input')
+            driver.execute_script("arguments[0].click();", store_sub_note)
+            time.sleep(0.2)
+        elif store_name == StoreNameEnum.Grip.value:
+            store_sub_note = driver.find_element(By.XPATH, '//label[./span[./button[./span[text()="그립"]]]]//input')
+            driver.execute_script("arguments[0].click();", store_sub_note)
+            time.sleep(0.2)
+        elif store_name == StoreNameEnum.Brandi.value:
+            store_sub_note = driver.find_element(By.XPATH, '//label[./span[./button[./span[text()="브랜디"]]]]//input')
+            driver.execute_script("arguments[0].click();", store_sub_note)
+            time.sleep(0.2)
+        elif store_name == StoreNameEnum.KakaoTalkStore.value:
+            store_sub_note = driver.find_element(By.XPATH, '//label[./span[./button[./span[text()="카카오"]]]]//input')
+            driver.execute_script("arguments[0].click();", store_sub_note)
+            time.sleep(0.2)
+
+        print()
 
     # 전체작업 시작
     def work_start(self):
@@ -238,8 +342,6 @@ class SabangnetRegistUploadProcess:
                     print(f"[{self.target_date}] 작업 시작")
 
                     self.sabangnet_main()
-
-                    print(f"11번가, 위메프: {self.guiDto.is_eleven}")
 
                     if self.guiDto.is_eleven:
                         self.eleven_shop_regist()
