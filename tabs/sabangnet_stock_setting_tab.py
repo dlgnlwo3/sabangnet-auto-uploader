@@ -43,10 +43,6 @@ class SabangnetStockSettingTab(QWidget):
         self.browser.append(f"[{now}] {str(text)}")
         global_log_append(text)
 
-    # 크롬 브라우저
-    def open_chrome_browser(self):
-        open_browser()
-
     # 시작 클릭
     def stock_setting_start_button_clicked(self):
         self.config = Config()
@@ -158,16 +154,6 @@ class SabangnetStockSettingTab(QWidget):
         sheet_search_inner_layout.addWidget(self.sheet_search_button)
         sheet_search_groupbox.setLayout(sheet_search_inner_layout)
 
-        # 사전 작업용 브라우저
-        chrome_browser_groupbox = QGroupBox("브라우저 사전 작업")
-        self.chrome_browser_button = QPushButton("브라우저 열기")
-
-        self.chrome_browser_button.clicked.connect(self.open_chrome_browser)
-
-        browser_inner_layout = QVBoxLayout()
-        browser_inner_layout.addWidget(self.chrome_browser_button)
-        chrome_browser_groupbox.setLayout(browser_inner_layout)
-
         # 시작 중지
         start_stop_groupbox = QGroupBox("시작 중지")
         self.stock_setting_start_button = QPushButton("시작")
@@ -203,8 +189,7 @@ class SabangnetStockSettingTab(QWidget):
         date_list_layout = QHBoxLayout()
 
         bottom_layout = QHBoxLayout()
-        bottom_layout.addStretch(5)
-        bottom_layout.addWidget(chrome_browser_groupbox, 2)
+        bottom_layout.addStretch(7)
         bottom_layout.addWidget(start_stop_groupbox, 3)
 
         log_layout = QVBoxLayout()

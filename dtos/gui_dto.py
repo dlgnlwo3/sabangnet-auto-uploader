@@ -13,7 +13,7 @@ class GUIDto:
         self.__sabangnet_pw = ""
         self.__target_date_list = []
 
-        # 등록 송신 시 [11번가, 위메프], [일반 쇼핑몰]인지 확인하는 부분
+        # 등록송신 시 [11번가, 위메프], [일반 쇼핑몰]인지 확인하는 부분
         self.__is_eleven = bool
 
     @property

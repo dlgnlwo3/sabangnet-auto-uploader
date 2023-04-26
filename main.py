@@ -88,7 +88,7 @@ class MainUI(QWidget):
         # 탭 추가
         tabs = QTabWidget()
         tabs.addTab(self.sabangnet_regist_upload_tab, "등록송신")
-        tabs.addTab(self.sabangnet_stock_setting_tab, "전체품절설정")
+        tabs.addTab(self.sabangnet_stock_setting_tab, "품절설정")
         tabs.addTab(self.user_setting_tab, "사용자 설정")
 
         vbox = QVBoxLayout()

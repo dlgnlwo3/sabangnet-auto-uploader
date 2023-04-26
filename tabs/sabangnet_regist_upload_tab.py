@@ -126,7 +126,7 @@ class SabangnetRegistUploadTab(QWidget):
         self.date_listwidget.addItem(target_date)
 
     def remove_date_button_clicked(self):
-        print("click")
+        print("remove_date_button_clicked")
         selected_items = self.date_listwidget.selectedItems()
         if not selected_items:
             return
