@@ -18,7 +18,6 @@ from enums.store_name_enum import StoreNameEnum
 
 from features.convert_store_name import StoreNameConverter
 
-from dtos.store_detail_dto import StoreDetailDto
 
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
