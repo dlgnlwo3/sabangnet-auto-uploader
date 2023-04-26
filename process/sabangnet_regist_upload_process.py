@@ -109,12 +109,82 @@ class SabangnetRegistUploadProcess:
         )
         time.sleep(0.5)
 
+    # 쇼핑몰상품등록 화면 이동
+    def sabangnet_regist_menu(self):
+        driver = self.driver
+        driver.get("https://sbadmin09.sabangnet.co.kr/#/mall/mall-product-registration")
+        WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, '//div[./span[contains(text(), "쇼핑몰상품등록")]]'))
+        )
+        time.sleep(0.5)
+
+    # 11번가, 위메프 작업
+    def eleven_shop_regist(self):
+        print("11번가, 위메프 작업")
+
+        try:
+            shop_name = StoreNameEnum.ElevenStreet.value
+            self.shop_regist_upload(shop_name)
+        except Exception as e:
+            print(e)
+            self.log_msg.emit(f"{shop_name} 작업 실패")
+
+        try:
+            shop_name = StoreNameEnum.WeMakePrice.value
+            self.shop_regist_upload(shop_name)
+        except Exception as e:
+            print(e)
+            self.log_msg.emit(f"{shop_name} 작업 실패")
+
+    # 일반 쇼핑몰 작업
+    def shop_regist(self):
+        print("일반 쇼핑몰 작업")
+
+        try:
+            shop_name = StoreNameEnum.Cafe24.value
+            self.shop_regist_upload(shop_name)
+        except Exception as e:
+            print(e)
+            self.log_msg.emit(f"{shop_name} 작업 실패")
+
+        try:
+            shop_name = StoreNameEnum.Coupang.value
+            self.shop_regist_upload(shop_name)
+        except Exception as e:
+            print(e)
+            self.log_msg.emit(f"{shop_name} 작업 실패")
+
+        try:
+            shop_name = StoreNameEnum.Grip.value
+            self.shop_regist_upload(shop_name)
+        except Exception as e:
+            print(e)
+            self.log_msg.emit(f"{shop_name} 작업 실패")
+
+        try:
+            shop_name = StoreNameEnum.Brandi.value
+            self.shop_regist_upload(shop_name)
+        except Exception as e:
+            print(e)
+            self.log_msg.emit(f"{shop_name} 작업 실패")
+
+        try:
+            shop_name = StoreNameEnum.KakaoTalkStore.value
+            self.shop_regist_upload(shop_name)
+        except Exception as e:
+            print(e)
+            self.log_msg.emit(f"{shop_name} 작업 실패")
+
+    def shop_regist_upload(self, shop_name):
+        self.sabangnet_regist_menu()
+        print(shop_name)
+
     # 전체작업 시작
     def work_start(self):
         print(f"process: work_start")
 
         try:
-            # self.sabangnet_login()
+            self.sabangnet_login()
 
             for target_date in self.guiDto.target_date_list:
                 self.target_date = target_date
@@ -122,9 +192,14 @@ class SabangnetRegistUploadProcess:
                 try:
                     print(f"[{self.target_date}] 작업 시작")
 
-                    # self.sabangnet_main()
+                    self.sabangnet_main()
 
                     print(f"11번가, 위메프: {self.guiDto.is_eleven}")
+
+                    if self.guiDto.is_eleven:
+                        self.eleven_shop_regist()
+                    else:
+                        self.shop_regist()
 
                 except Exception as e:
                     print(e)
