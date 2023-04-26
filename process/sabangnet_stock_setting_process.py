@@ -124,7 +124,7 @@ class SabangnetStockSettingProcess:
         )
         time.sleep(0.5)
 
-    def stock_setting(self, product_code: str, soldout_type: str):
+    def stock_setting(self, product_code: str, product_name: str, soldout_type: str):
         driver = self.driver
 
         self.sabangnet_stock_setting_menu()
@@ -145,6 +145,7 @@ class SabangnetStockSettingProcess:
         for search_type_select in search_type_select_list:
             driver.execute_script("arguments[0].click();", search_type_select)
             time.sleep(0.2)
+            break
 
         # 자체상품코드 입력 후 엔터 (검색버튼의 셀렉터가 약간 다름)
         # $x('//div[./span[contains(text(), "검색항목")]]/following-sibling::div//input[not(contains(@readonly, "readonly"))]')
@@ -170,16 +171,31 @@ class SabangnetStockSettingProcess:
 
         print(f"작업타입: {soldout_type}")
 
-        if soldout_type == "옵션품절":
-            # 옵션품절 작업
-            pass
-        elif soldout_type == "전체품절":
-            # 전체품절 작업
+        if soldout_type == "전체품절":
+            # 상품 전체 선택
+
+            # 상품상태 -> 미사용
+            product_state_setting = driver.find_elements(By.XPATH, '//li[./span[contains(text(), "미사용")]]')[1]
+            driver.execute_script("arguments[0].click();", product_state_setting)
+            time.sleep(0.2)
+
+            # 선택 상품상태 변경
+            update_state = driver.find_element(By.XPATH, '//button[./span[contains(text(), "선택 상품상태변경")]]')
+            driver.execute_script("arguments[0].click();", update_state)
+            time.sleep(0.2)
+
+        elif soldout_type == "옵션품절":
+            print(f"[{product_code}] [{product_name}] 옵션별 수량을 작성해주세요.")
+            self.log_msg.emit(f"[{product_code}] [{product_name}] 옵션별 수량을 작성해주세요.")
             pass
         else:
             self.log_msg.emit(f"[{soldout_type}] 품절여부 형식이 다릅니다.")
             raise Exception(f"[{soldout_type}] 품절여부 형식이 다릅니다.")
 
+        print()
+
+    def store_setting(self, product_code: str, product_name: str, soldout_type: str):
+        driver = self.driver
         print()
 
     # 전체작업 시작
@@ -212,7 +228,9 @@ class SabangnetStockSettingProcess:
 
                     self.sabangnet_main()
 
-                    self.stock_setting(product_code, soldout_type)
+                    self.stock_setting(product_code, product_name, soldout_type)
+
+                    self.store_setting(product_code, product_name, soldout_type)
 
                 except Exception as e:
                     print(e)
