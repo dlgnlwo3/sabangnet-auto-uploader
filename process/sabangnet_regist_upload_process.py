@@ -176,8 +176,53 @@ class SabangnetRegistUploadProcess:
             self.log_msg.emit(f"{shop_name} 작업 실패")
 
     def shop_regist_upload(self, shop_name):
+        driver = self.driver
+
         self.sabangnet_regist_menu()
-        print(shop_name)
+
+        # 날짜 검색 기준 설정
+        search_date_setting = driver.find_element(By.XPATH, '//li[./span[contains(text(), "상품등록일")]]')
+        driver.execute_script("arguments[0].click();", search_date_setting)
+        time.sleep(0.2)
+
+        target_date: str = self.target_date
+        target_date = target_date.replace("-", "")
+
+        # 시작일
+        input_start_date = driver.find_elements(By.XPATH, '//div[contains(@class, "date-editor")]/input')[0]
+        input_start_date.clear()
+        input_start_date.send_keys(target_date, Keys.ENTER)
+        time.sleep(0.2)
+
+        # 종료일
+        input_end_date = driver.find_elements(By.XPATH, '//div[contains(@class, "date-editor")]/input')[1]
+        input_end_date.clear()
+        input_end_date.send_keys(target_date, Keys.ENTER)
+        time.sleep(0.2)
+
+        # 검색 버튼 클릭
+        search_button = driver.find_element(
+            By.XPATH, '//button[contains(@class, "search-btn")][./span[contains(text(), "검색")]]'
+        )
+        driver.execute_script("arguments[0].click();", search_button)
+        time.sleep(0.2)
+
+        # table에 검색 결과가 나오지 않으면 오류로 간주
+        # $x('//table[contains(@class, "table__body")]//tr')
+        try:
+            WebDriverWait(driver, 5).until(
+                EC.visibility_of_element_located((By.XPATH, '//table[contains(@class, "table__body")]//tr'))
+            )
+            time.sleep(0.5)
+
+        except Exception as e:
+            self.log_msg.emit(f"[{self.target_date}] 검색 결과를 발견하지 못했습니다.")
+            raise Exception(f"[{self.target_date}] 검색 결과를 발견하지 못했습니다.")
+
+        # 쇼핑몰선택
+        shop_select = driver.find_element(By.XPATH, f'//li[./span[text()="{shop_name}"]]')
+        driver.execute_script("arguments[0].click();", shop_select)
+        time.sleep(0.2)
 
     # 전체작업 시작
     def work_start(self):
