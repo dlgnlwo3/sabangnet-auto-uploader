@@ -326,7 +326,17 @@ class SabangnetRegistUploadProcess:
             driver.execute_script("arguments[0].click();", store_sub_note)
             time.sleep(0.2)
 
-        print()
+        # 쇼핑몰 카테고리
+        # 위메프에서는 '쉬폰/시스루 블라우스' 선택
+        if store_name == StoreNameEnum.WeMakePrice.value:
+            store_category = driver.find_element(
+                By.XPATH, '//label[./span[./button[./span[text()="쉬폰/시스루 블라우스"]]]]//input'
+            )
+            driver.execute_script("arguments[0].click();", store_category)
+            time.sleep(0.2)
+
+        # 즉시송신 클릭
+        print("즉시송신 클릭 시점")
 
     # 전체작업 시작
     def work_start(self):
@@ -356,7 +366,7 @@ class SabangnetRegistUploadProcess:
             print(e)
 
         finally:
-            self.driver.close()
+            self.driver.quit()
             time.sleep(0.2)
 
 
