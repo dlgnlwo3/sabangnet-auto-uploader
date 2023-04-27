@@ -224,7 +224,7 @@ class SabangnetRegistUploadProcess:
         driver.execute_script("arguments[0].click();", shop_select)
         time.sleep(0.2)
 
-        # 전체선택 체크박스
+        # 전체 선택 체크박스
         select_all_checkbox = driver.find_element(By.XPATH, '//thead//th//input[contains(@class, "checkbox")]')
         driver.execute_script("arguments[0].click();", select_all_checkbox)
         time.sleep(0.2)
@@ -234,8 +234,10 @@ class SabangnetRegistUploadProcess:
         driver.execute_script("arguments[0].click();", regist_upload_button)
         time.sleep(0.2)
 
+        tabs = driver.window_handles
+        print(tabs)
         try:
-            driver.switch_to.window(driver.window_handles[1])
+            driver.switch_to.window(tabs[1])
             self.send_regist(store_name)
 
         except Exception as e:
@@ -245,7 +247,7 @@ class SabangnetRegistUploadProcess:
         finally:
             # 원래 탭으로 돌아오기
             driver.close()
-            driver.switch_to.window(driver.window_handles[0])
+            driver.switch_to.window(tabs[0])
             time.sleep(0.5)
 
     # 즉시송신
