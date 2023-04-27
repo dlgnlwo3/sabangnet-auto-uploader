@@ -33,7 +33,7 @@ from openpyxl import load_workbook
 from common.google_sheet import get_worksheet
 
 
-class SabangnetStockSettingProcess:
+class SabangnetModifyUploadProcess:
     def __init__(self):
         self.default_wait = 10
         self.driver: webdriver.Chrome = get_chrome_driver_new(is_headless=False, is_secret=True)
@@ -381,36 +381,25 @@ class SabangnetStockSettingProcess:
         self.log_msg.emit(f"{len(self.df_googlesheet)}개의 데이터 중 {len(self.df_product_code)}개의 자체상품코드를 발견했습니다.")
 
         try:
-            self.sabangnet_login()
+            # self.sabangnet_login()
 
             for i, row in self.df_product_code[:].iterrows():
                 try:
-                    product_code = str(row[StockSettingSheetEnum.ProductCode.value])
-                    product_name = str(row[StockSettingSheetEnum.ProductName.value])
-                    soldout_type = str(row[StockSettingSheetEnum.SoldOutType.value])
-                    sabangnet_check = str(row[StockSettingSheetEnum.Sabangnet.value])
+                    product_code = str(row[ModifySheetEnum.ProductCode.value])
+                    product_name = str(row[ModifySheetEnum.ProductName.value])
+                    detail_modify = str(row[ModifySheetEnum.DetailModify.value])
+                    html_modify = str(row[ModifySheetEnum.HTMLModify.value])
 
-                    if sabangnet_check.find("품절처리완료") > -1 or sabangnet_check.find("처리 완료") > -1:
-                        print(f"{i}, {product_code}, {product_name}, {soldout_type} 이미 {sabangnet_check}된 행입니다.")
-                        self.log_msg.emit(
-                            f"{i}, {product_code}, {product_name}, {soldout_type} 이미 {sabangnet_check}된 행입니다."
-                        )
-                        continue
-
-                    print(f"{i}, {product_code}, {product_name}, {soldout_type} 작업 시작")
-                    self.log_msg.emit(f"{i}, {product_code}, {product_name}, {soldout_type} 작업 시작")
+                    print(f"{i}, {product_code}, {product_name}, {detail_modify}, {html_modify} 작업 시작")
+                    self.log_msg.emit(f"{i}, {product_code}, {product_name}, {detail_modify}, {html_modify} 작업 시작")
 
                     self.sabangnet_main()
-
-                    self.stock_setting(product_code, product_name, soldout_type)
-
-                    self.store_setting(product_code, product_name, soldout_type)
 
                     print(f"구글 시트 적용 시점")
 
                 except Exception as e:
                     print(e)
-                    self.log_msg.emit(f"{i}, {product_code}, {product_name}, {soldout_type} 작업 실패")
+                    self.log_msg.emit(f"{i}, {product_code}, {product_name}, {detail_modify}, {html_modify} 작업 실패")
                     continue
 
                 finally:
@@ -425,6 +414,6 @@ class SabangnetStockSettingProcess:
 
 
 if __name__ == "__main__":
-    # process = SabangnetAutoUploaderProcess()
+    # process = SabangnetModifyUploadProcess()
     # process.work_start()
     pass

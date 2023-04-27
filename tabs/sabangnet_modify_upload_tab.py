@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from datetime import *
 
-from threads.sabangnet_stock_setting_thread import SabangnetStockSettingThread
+from threads.sabangnet_modify_upload_thread import SabangnetModifyUploadThread
 from dtos.gui_dto import GUIDto
 from common.utils import *
 
@@ -25,7 +25,7 @@ from common.google_sheet import get_spreadsheet
 import gspread
 
 
-class SabangnetStockSettingTab(QWidget):
+class SabangnetModifyUploadTab(QWidget):
     # 초기화
     def __init__(self):
         self.config = Config()
@@ -44,7 +44,7 @@ class SabangnetStockSettingTab(QWidget):
         global_log_append(text)
 
     # 시작 클릭
-    def stock_setting_start_button_clicked(self):
+    def modify_upload_start_button_clicked(self):
         self.config = Config()
         __saved_data = self.config.get_data()
         self.saved_data = self.config.dict_to_data(__saved_data)
@@ -73,31 +73,31 @@ class SabangnetStockSettingTab(QWidget):
         guiDto.sabangnet_id = self.saved_data.sabangnet_id
         guiDto.sabangnet_pw = self.saved_data.sabangnet_pw
 
-        self.stock_setting_thread = SabangnetStockSettingThread()
-        self.stock_setting_thread.log_msg.connect(self.log_append)
-        self.stock_setting_thread.stock_setting_finished.connect(self.stock_setting_finished)
-        self.stock_setting_thread.setGuiDto(guiDto)
+        self.modify_upload_thread = SabangnetModifyUploadThread()
+        self.modify_upload_thread.log_msg.connect(self.log_append)
+        self.modify_upload_thread.modify_upload_finished.connect(self.modify_upload_finished)
+        self.modify_upload_thread.setGuiDto(guiDto)
 
-        self.stock_setting_start_button.setDisabled(True)
-        self.stock_setting_stop_button.setDisabled(False)
-        self.stock_setting_thread.start()
+        self.modify_upload_start_button.setDisabled(True)
+        self.modify_upload_stop_button.setDisabled(False)
+        self.modify_upload_thread.start()
 
     # 중지 클릭
     @pyqtSlot()
-    def stock_setting_stop_button_clicked(self):
+    def modify_upload_stop_button_clicked(self):
         print(f"search stop clicked")
         self.log_append(f"중지 클릭")
-        self.stock_setting_finished()
+        self.modify_upload_finished()
 
     # 작업 종료
     @pyqtSlot()
-    def stock_setting_finished(self):
+    def modify_upload_finished(self):
         print(f"search thread finished")
         self.log_append(f"작업 종료")
-        self.stock_setting_thread.stop()
-        self.stock_setting_start_button.setDisabled(False)
-        self.stock_setting_stop_button.setDisabled(True)
-        print(f"thread_is_running: {self.stock_setting_thread.isRunning()}")
+        self.modify_upload_thread.stop()
+        self.modify_upload_start_button.setDisabled(False)
+        self.modify_upload_stop_button.setDisabled(True)
+        print(f"thread_is_running: {self.modify_upload_thread.isRunning()}")
 
     def set_sheet_combobox(self, sheet_list):
         for sheet in sheet_list:
@@ -155,17 +155,17 @@ class SabangnetStockSettingTab(QWidget):
         sheet_search_groupbox.setLayout(sheet_search_inner_layout)
 
         # 시작 중지
-        start_stop_groupbox = QGroupBox("품절 설정 시작 중지")
-        self.stock_setting_start_button = QPushButton("시작")
-        self.stock_setting_stop_button = QPushButton("중지")
-        self.stock_setting_stop_button.setDisabled(True)
+        start_stop_groupbox = QGroupBox("수정 송신 시작 중지")
+        self.modify_upload_start_button = QPushButton("시작")
+        self.modify_upload_stop_button = QPushButton("중지")
+        self.modify_upload_stop_button.setDisabled(True)
 
-        self.stock_setting_start_button.clicked.connect(self.stock_setting_start_button_clicked)
-        self.stock_setting_stop_button.clicked.connect(self.stock_setting_stop_button_clicked)
+        self.modify_upload_start_button.clicked.connect(self.modify_upload_start_button_clicked)
+        self.modify_upload_stop_button.clicked.connect(self.modify_upload_stop_button_clicked)
 
         start_stop_inner_layout = QHBoxLayout()
-        start_stop_inner_layout.addWidget(self.stock_setting_start_button)
-        start_stop_inner_layout.addWidget(self.stock_setting_stop_button)
+        start_stop_inner_layout.addWidget(self.modify_upload_start_button)
+        start_stop_inner_layout.addWidget(self.modify_upload_stop_button)
         start_stop_groupbox.setLayout(start_stop_inner_layout)
 
         # 로그 그룹박스

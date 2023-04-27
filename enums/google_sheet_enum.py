@@ -32,4 +32,4 @@ class ModifySheetEnum(Enum):
 
 
 if __name__ == "__main__":
-    print(StockSettingSheetEnum.IsSoldOut.value)
+    print(StockSettingSheetEnum.IsFinished.value)
