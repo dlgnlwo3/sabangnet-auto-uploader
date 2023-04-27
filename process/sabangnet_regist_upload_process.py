@@ -101,21 +101,27 @@ class SabangnetRegistUploadProcess:
     # 메인화면으로 이동 (반복 작업 시 필요)
     def sabangnet_main(self):
         driver = self.driver
+        driver.refresh()
+        time.sleep(0.5)
         driver.get("https://sbadmin09.sabangnet.co.kr/#/dashboard")
         time.sleep(0.5)
         WebDriverWait(driver, 10).until(
             EC.visibility_of_element_located((By.XPATH, '//a[contains(@href, "dashboard")]'))
         )
-        time.sleep(0.5)
+        time.sleep(1)
 
     # 쇼핑몰상품등록 화면 이동
     def sabangnet_regist_menu(self):
         driver = self.driver
+        driver.refresh()
+        time.sleep(0.5)
         driver.get("https://sbadmin09.sabangnet.co.kr/#/mall/mall-product-registration")
         WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located((By.XPATH, '//div[./span[contains(text(), "쇼핑몰상품등록")]]'))
+            EC.visibility_of_element_located(
+                (By.XPATH, '//div[./span[contains(text(), "쇼핑몰상품등록")]][not(contains(@class, "scroll"))]')
+            )
         )
-        time.sleep(0.5)
+        time.sleep(1)
 
     # 11번가, 위메프 작업
     def eleven_shop_regist(self):

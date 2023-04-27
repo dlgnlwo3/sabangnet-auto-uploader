@@ -107,6 +107,8 @@ class SabangnetStockSettingProcess:
     # 메인화면으로 이동 (반복 작업 시 필요)
     def sabangnet_main(self):
         driver = self.driver
+        driver.refresh()
+        time.sleep(0.5)
         driver.get("https://sbadmin09.sabangnet.co.kr/#/dashboard")
         time.sleep(0.5)
         WebDriverWait(driver, 10).until(
@@ -114,15 +116,19 @@ class SabangnetStockSettingProcess:
         )
         time.sleep(0.5)
 
-    # 쇼핑몰상품등록 화면 이동
+    # 사방넷상품조회수정 화면 이동
     def sabangnet_stock_setting_menu(self):
         driver = self.driver
+        driver.refresh()
+        time.sleep(0.5)
         driver.get("https://sbadmin09.sabangnet.co.kr/#/product/product-inquiry")
         time.sleep(0.5)
         WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located((By.XPATH, '//a[contains(@href, "dashboard")]'))
+            EC.visibility_of_element_located(
+                (By.XPATH, '//div[./span[contains(text(), "사방넷상품조회수정")]][not(contains(@class, "scroll"))]')
+            )
         )
-        time.sleep(0.5)
+        time.sleep(1)
 
     def stock_setting(self, product_code: str, product_name: str, soldout_type: str):
         driver = self.driver
@@ -217,12 +223,16 @@ class SabangnetStockSettingProcess:
     # 쇼핑몰상품수정 화면 이동
     def sabangnet_store_upload_menu(self):
         driver = self.driver
+        driver.refresh()
+        time.sleep(0.5)
         driver.get("https://sbadmin09.sabangnet.co.kr/#/mall/mall-product-update")
         time.sleep(0.5)
         WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located((By.XPATH, '//a[contains(@href, "dashboard")]'))
+            EC.visibility_of_element_located(
+                (By.XPATH, '//div[./span[contains(text(), "쇼핑몰상품수정")]][not(contains(@class, "scroll"))]')
+            )
         )
-        time.sleep(0.5)
+        time.sleep(1)
 
     def store_setting(self, product_code: str, product_name: str, soldout_type: str):
         driver = self.driver
@@ -309,6 +319,7 @@ class SabangnetStockSettingProcess:
         print(tabs)
         try:
             driver.switch_to.window(tabs[1])
+            self.upload_regist(soldout_type)
 
         except Exception as e:
             print(e)
@@ -320,7 +331,38 @@ class SabangnetStockSettingProcess:
             driver.switch_to.window(tabs[0])
             time.sleep(0.5)
 
-        print()
+    # 상품수정송신
+    def upload_regist(self, soldout_type: str):
+        driver = self.driver
+        WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, '//div[./span[contains(text(), "상품수정 송신")]]'))
+        )
+        time.sleep(0.5)
+
+        if soldout_type == "전체품절":
+            product_state_change_radio_button = driver.find_element(
+                By.XPATH, '//tr[./td[.//strong[contains(text(), "상품의 판매상태를 수정합니다.")]]]//input[@type="radio"]'
+            )
+            driver.execute_script("arguments[0].click();", product_state_change_radio_button)
+            time.sleep(0.2)
+
+            pause_product = driver.find_element(By.XPATH, '//li[./span[contains(text(), "일시중지")]]')
+            driver.execute_script("arguments[0].click();", pause_product)
+            time.sleep(0.2)
+
+        elif soldout_type == "옵션품절":
+            product_state_change_radio_button = driver.find_element(
+                By.XPATH,
+                '//tr[./td[.//strong[contains(text(), "사방넷에 등록된 옵션상태와 재고수량을 쇼핑몰에 반영합니다.")]]]//input[@type="radio"]',
+            )
+            driver.execute_script("arguments[0].click();", product_state_change_radio_button)
+            time.sleep(0.2)
+
+            option_stock_state = driver.find_element(By.XPATH, '//li[./span[text()="기본옵션"]]')
+            driver.execute_script("arguments[0].click();", option_stock_state)
+            time.sleep(0.2)
+
+        print(f"즉시송신 클릭 시점")
 
     # 전체작업 시작
     def work_start(self):
@@ -355,6 +397,8 @@ class SabangnetStockSettingProcess:
                     self.stock_setting(product_code, product_name, soldout_type)
 
                     self.store_setting(product_code, product_name, soldout_type)
+
+                    print(f"구글 시트 적용 시점")
 
                 except Exception as e:
                     print(e)
