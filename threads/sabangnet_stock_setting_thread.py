@@ -16,7 +16,7 @@ from timeit import default_timer as timer
 
 from process.sabangnet_stock_setting_process import SabangnetStockSettingProcess
 
-import debugpy
+# import debugpy
 
 
 class SabangnetStockSettingThread(QThread):
@@ -33,7 +33,7 @@ class SabangnetStockSettingThread(QThread):
 
     def run(self):
         try:
-            debugpy.debug_this_thread()
+            # debugpy.debug_this_thread()
 
             self.log_msg.emit(f"시작")
 
