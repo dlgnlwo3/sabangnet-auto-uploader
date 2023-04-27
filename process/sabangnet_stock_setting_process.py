@@ -370,7 +370,7 @@ class SabangnetStockSettingProcess:
         # 로딩화면
         self.wait_loading()
 
-        time.sleep(0.5)
+        time.sleep(5)
 
         # 로딩 완료 후 자동으로 창 닫김 -> 다른 새 창 발생
         try:
@@ -380,6 +380,8 @@ class SabangnetStockSettingProcess:
             time.sleep(0.5)
         except Exception as e:
             print(e)
+
+        self.wait_loading()
 
         print()
 

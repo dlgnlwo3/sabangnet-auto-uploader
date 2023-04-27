@@ -274,6 +274,93 @@ class SabangnetModifyUploadProcess:
 
         print(f"즉시송신 클릭 시점")
 
+        upload_now_button = driver.find_element(By.XPATH, '//button[./span[contains(text(), "즉시송신")]]')
+        driver.execute_script("arguments[0].click();", upload_now_button)
+        time.sleep(1)
+
+        # 로딩화면
+        self.wait_loading()
+
+        time.sleep(5)
+
+        # 로딩 완료 후 자동으로 창 닫김 -> 다른 새 창 발생
+        try:
+            driver.switch_to.window(driver.window_handles[0])
+            time.sleep(0.5)
+            driver.switch_to.window(driver.window_handles[1])
+            time.sleep(0.5)
+        except Exception as e:
+            print(e)
+
+        self.wait_loading()
+
+        print()
+
+        # 상품품절 송신 화면 -> 사방넷 클라이언트가 설치되어있어야 작동한다.
+        # $x('//b[contains(text(), "종료") and contains(text(), "송신작업이 완료되었습니다")]')
+        # $x('//b[contains(text(), "결과") and contains(text(), "실패건은 Message 확인후 재송신바랍니다")]')
+        try:
+            WebDriverWait(driver, self.default_wait).until(
+                EC.visibility_of_element_located(
+                    (By.XPATH, '//b[contains(text(), "결과") and contains(text(), "실패건은 Message 확인후 재송신바랍니다")]')
+                )
+            )
+            time.sleep(0.5)
+
+            upload_result_message = driver.find_element(
+                By.XPATH, '//b[contains(text(), "결과") and contains(text(), "실패건은 Message 확인후 재송신바랍니다")]'
+            ).get_attribute("textContent")
+
+            print(upload_result_message)
+
+            self.log_msg.emit(upload_result_message)
+
+            print("송신 성공 시점")
+
+        except Exception as e:
+            print(e)
+            raise Exception("작업 성공 메시지를 발견하지 못했습니다.")
+
+        finally:
+            pass
+
+    def wait_loading(self):
+        driver = self.driver
+        # $x('//img[contains(@src, "loading") and contains(@src, ".gif")]')
+        loading = True
+        wait_count = 1
+        driver.implicitly_wait(1)
+        try:
+            loading_screen = driver.find_element(
+                By.XPATH, '//img[contains(@src, "loading") and contains(@src, ".gif")]'
+            )
+        except Exception as e:
+            print(f"loading finished")
+
+        driver.implicitly_wait(1)
+        while loading:
+            try:
+                print(f"wait_count: {wait_count}")
+                loading_screen = driver.find_element(
+                    By.XPATH, '//img[contains(@src, "loading") and contains(@src, ".gif")]'
+                )
+                wait_count = wait_count + 1
+                loading = True
+                if wait_count > self.maximum_wait:
+                    loading = False
+                    raise Exception("무한 로딩")
+
+            except UserWarning as ue:
+                print(f"최대 대기시간 {self.maximum_wait}초 초과")
+                raise Exception("무한 로딩")
+
+            except Exception as e:
+                print(f"로딩 완료")
+                break
+
+            finally:
+                time.sleep(1)
+
     def get_gs_data(self, url, sheet_name):
         self.worksheet = get_worksheet(url, sheet_name)
         data = self.worksheet.get_all_values()
