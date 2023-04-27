@@ -247,10 +247,8 @@ class SabangnetRegistUploadProcess:
         driver.execute_script("arguments[0].click();", regist_upload_button)
         time.sleep(0.2)
 
-        tabs = driver.window_handles
-        print(tabs)
         try:
-            driver.switch_to.window(tabs[1])
+            driver.switch_to.window(driver.window_handles[1])
             self.send_regist(store_name)
 
         except Exception as e:
@@ -260,7 +258,7 @@ class SabangnetRegistUploadProcess:
         finally:
             # 원래 탭으로 돌아오기
             driver.close()
-            driver.switch_to.window(tabs[0])
+            driver.switch_to.window(driver.window_handles[0])
             time.sleep(0.5)
 
     # 즉시송신

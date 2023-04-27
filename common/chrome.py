@@ -44,7 +44,7 @@ def chromedriver_install(options):
     return driver
 
 
-def get_chrome_driver(is_headless=False, is_secret=False):
+def get_chrome_driver(is_headless=False, is_secret=True):
     options = Options()
     if is_headless:
         options.add_argument("--headless")
@@ -73,7 +73,7 @@ def get_chrome_driver(is_headless=False, is_secret=False):
     return driver
 
 
-def get_chrome_driver_new(is_headless=False, is_secret=False, tor=False, move_to_corner=False):
+def get_chrome_driver_new(is_headless=False, is_secret=True, tor=False, move_to_corner=False):
     options = Options()
 
     # options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")

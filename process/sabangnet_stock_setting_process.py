@@ -36,6 +36,7 @@ from common.google_sheet import get_worksheet
 class SabangnetStockSettingProcess:
     def __init__(self):
         self.default_wait = 10
+        self.maximum_wait = 60
         self.driver: webdriver.Chrome = get_chrome_driver_new(is_headless=False, is_secret=True)
         self.driver.implicitly_wait(self.default_wait)
         self.driver.maximize_window()
@@ -189,28 +190,28 @@ class SabangnetStockSettingProcess:
             time.sleep(0.2)
 
             # 선택 상품상태 변경 -> 누르면 바로 적용됩니다.
-            # update_state = driver.find_element(By.XPATH, '//button[./span[contains(text(), "선택 상품상태변경")]]')
-            # driver.execute_script("arguments[0].click();", update_state)
-            # time.sleep(0.2)
+            update_state = driver.find_element(By.XPATH, '//button[./span[contains(text(), "선택 상품상태변경")]]')
+            driver.execute_script("arguments[0].click();", update_state)
+            time.sleep(0.2)
 
-            # # 정상적으로 처리되었습니다.
-            # try:
-            #     WebDriverWait(driver, 3).until(
-            #         EC.visibility_of_element_located((By.XPATH, '//p[contains(text(), "정상적으로 처리되었습니다")]'))
-            #     )
-            #     submit_message_box = driver.find_element(
-            #         By.XPATH,
-            #         '//div[@class="el-message-box"][.//p[contains(text(), "정상적으로 처리되었습니다")]]//button[./span[contains(text(), "확인")]]',
-            #     )
-            #     driver.execute_script("arguments[0].click();", submit_message_box)
-            #     time.sleep(0.2)
+            # 정상적으로 처리되었습니다.
+            try:
+                WebDriverWait(driver, 3).until(
+                    EC.visibility_of_element_located((By.XPATH, '//p[contains(text(), "정상적으로 처리되었습니다")]'))
+                )
+                submit_message_box = driver.find_element(
+                    By.XPATH,
+                    '//div[@class="el-message-box"][.//p[contains(text(), "정상적으로 처리되었습니다")]]//button[./span[contains(text(), "확인")]]',
+                )
+                driver.execute_script("arguments[0].click();", submit_message_box)
+                time.sleep(0.2)
 
-            # except Exception as e:
-            #     self.log_msg.emit(f"{product_code}, {product_name} 선택 상품상태변경 성공 메시지를 발견하지 못했습니다.")
-            #     raise Exception(f"{product_code}, {product_name} 선택 상품상태변경 성공 메시지를 발견하지 못했습니다.")
+            except Exception as e:
+                self.log_msg.emit(f"{product_code}, {product_name} 선택 상품상태변경 성공 메시지를 발견하지 못했습니다.")
+                raise Exception(f"{product_code}, {product_name} 선택 상품상태변경 성공 메시지를 발견하지 못했습니다.")
 
-            # finally:
-            #     time.sleep(0.5)
+            finally:
+                time.sleep(0.5)
 
         elif soldout_type == "옵션품절":
             print(f"{product_code} {product_name} 옵션별 수량을 작성해주세요.")
@@ -315,10 +316,8 @@ class SabangnetStockSettingProcess:
         driver.execute_script("arguments[0].click();", regist_upload_button)
         time.sleep(0.2)
 
-        tabs = driver.window_handles
-        print(tabs)
         try:
-            driver.switch_to.window(tabs[1])
+            driver.switch_to.window(driver.window_handles[1])
             self.upload_regist(soldout_type)
 
         except Exception as e:
@@ -328,7 +327,7 @@ class SabangnetStockSettingProcess:
         finally:
             # 원래 탭으로 돌아오기
             driver.close()
-            driver.switch_to.window(tabs[0])
+            driver.switch_to.window(driver.window_handles[0])
             time.sleep(0.5)
 
     # 상품수정송신
@@ -363,6 +362,67 @@ class SabangnetStockSettingProcess:
             time.sleep(0.2)
 
         print(f"즉시송신 클릭 시점")
+
+        upload_now_button = driver.find_element(By.XPATH, '//button[./span[contains(text(), "즉시송신")]]')
+        driver.execute_script("arguments[0].click();", upload_now_button)
+        time.sleep(1)
+
+        # 로딩화면 -> 창 닫김 -> 다른 새 창 발생
+        self.wait_loading()
+
+        time.sleep(0.5)
+
+        try:
+            driver.switch_to.window(driver.window_handles[0])
+            time.sleep(0.5)
+            driver.switch_to.window(driver.window_handles[1])
+            time.sleep(0.5)
+        except Exception as e:
+            print(e)
+
+        print()
+
+        # $x('//span[contains(text(), "사이트에 연결할 수 없음")]')
+
+    def wait_loading(self):
+        driver = self.driver
+        # $x('//img[contains(@src, "loading") and contains(@src, ".gif")]')
+        loading = True
+        wait_count = 1
+        driver.implicitly_wait(1)
+        try:
+            loading_screen = driver.find_element(
+                By.XPATH, '//img[contains(@src, "loading") and contains(@src, ".gif")]'
+            )
+        except Exception as e:
+            print(f"loading finished")
+
+        driver.implicitly_wait(1)
+        while loading:
+            try:
+                print(f"wait_count: {wait_count}")
+                loading_screen = driver.find_element(
+                    By.XPATH, '//img[contains(@src, "loading") and contains(@src, ".gif")]'
+                )
+                wait_count = wait_count + 1
+                loading = True
+                if wait_count > self.maximum_wait:
+                    loading = False
+                    raise Exception("무한 로딩")
+
+            except UserWarning as ue:
+                print(f"최대 대기시간 {self.maximum_wait}초 초과")
+                raise Exception("무한 로딩")
+
+            except Exception as e:
+                print(f"로딩 완료")
+                break
+
+            finally:
+                time.sleep(1)
+
+        print(f"wait_loading finished")
+        driver.implicitly_wait(self.default_wait)
 
     def get_gs_data(self, url, sheet_name):
         self.worksheet = get_worksheet(url, sheet_name)
