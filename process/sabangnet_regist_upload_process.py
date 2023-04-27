@@ -129,6 +129,7 @@ class SabangnetRegistUploadProcess:
 
         try:
             store_name = StoreNameEnum.ElevenStreet.value
+            self.log_msg.emit(f"{self.target_date} {store_name} 작업 시작")
             self.shop_regist_upload(store_name)
         except Exception as e:
             print(e)
@@ -136,6 +137,7 @@ class SabangnetRegistUploadProcess:
 
         try:
             store_name = StoreNameEnum.WeMakePrice.value
+            self.log_msg.emit(f"{self.target_date} {store_name} 작업 시작")
             self.shop_regist_upload(store_name)
         except Exception as e:
             print(e)
@@ -147,6 +149,7 @@ class SabangnetRegistUploadProcess:
 
         try:
             store_name = StoreNameEnum.Cafe24.value
+            self.log_msg.emit(f"{self.target_date} {store_name} 작업 시작")
             self.shop_regist_upload(store_name)
         except Exception as e:
             print(e)
@@ -154,6 +157,7 @@ class SabangnetRegistUploadProcess:
 
         try:
             store_name = StoreNameEnum.Coupang.value
+            self.log_msg.emit(f"{self.target_date} {store_name} 작업 시작")
             self.shop_regist_upload(store_name)
         except Exception as e:
             print(e)
@@ -161,6 +165,7 @@ class SabangnetRegistUploadProcess:
 
         try:
             store_name = StoreNameEnum.Grip.value
+            self.log_msg.emit(f"{self.target_date} {store_name} 작업 시작")
             self.shop_regist_upload(store_name)
         except Exception as e:
             print(e)
@@ -168,6 +173,7 @@ class SabangnetRegistUploadProcess:
 
         try:
             store_name = StoreNameEnum.Brandi.value
+            self.log_msg.emit(f"{self.target_date} {store_name} 작업 시작")
             self.shop_regist_upload(store_name)
         except Exception as e:
             print(e)
@@ -175,6 +181,7 @@ class SabangnetRegistUploadProcess:
 
         try:
             store_name = StoreNameEnum.KakaoTalkStore.value
+            self.log_msg.emit(f"{self.target_date} {store_name} 작업 시작")
             self.shop_regist_upload(store_name)
         except Exception as e:
             print(e)
@@ -356,7 +363,8 @@ class SabangnetRegistUploadProcess:
                 self.target_date = target_date
 
                 try:
-                    print(f"[{self.target_date}] 작업 시작")
+                    print(f"{self.target_date} 작업 시작")
+                    self.log_msg.emit(f"{self.target_date} 작업 시작")
 
                     self.sabangnet_main()
 
@@ -365,8 +373,11 @@ class SabangnetRegistUploadProcess:
                     else:
                         self.shop_regist()
 
+                    self.log_msg.emit(f"{self.target_date} 작업 완료")
+
                 except Exception as e:
                     print(e)
+                    self.log_msg.emit(f"{self.target_date} 작업 실패 {str(e)}")
                     continue
 
         except Exception as e:

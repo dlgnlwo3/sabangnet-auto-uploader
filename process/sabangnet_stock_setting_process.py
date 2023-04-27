@@ -406,7 +406,7 @@ class SabangnetStockSettingProcess:
 
                     self.store_setting(product_code, product_name, soldout_type)
 
-                    print(f"구글 시트 적용 시점")
+                    self.log_msg.emit(f"{i}, {product_code}, {product_name}, {soldout_type} 작업 완료")
 
                 except Exception as e:
                     print(e)

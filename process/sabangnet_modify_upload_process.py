@@ -116,110 +116,6 @@ class SabangnetModifyUploadProcess:
         )
         time.sleep(0.5)
 
-    # 사방넷상품조회수정 화면 이동
-    def sabangnet_stock_setting_menu(self):
-        driver = self.driver
-        driver.refresh()
-        time.sleep(0.5)
-        driver.get("https://sbadmin09.sabangnet.co.kr/#/product/product-inquiry")
-        time.sleep(0.5)
-        WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located(
-                (By.XPATH, '//div[./span[contains(text(), "사방넷상품조회수정")]][not(contains(@class, "scroll"))]')
-            )
-        )
-        time.sleep(1)
-
-    def stock_setting(self, product_code: str, product_name: str, soldout_type: str):
-        driver = self.driver
-
-        self.sabangnet_stock_setting_menu()
-
-        # 날짜 검색 기준 설정
-        search_date_setting = driver.find_element(By.XPATH, '//li[./span[contains(text(), "상품등록일")]]')
-        driver.execute_script("arguments[0].click();", search_date_setting)
-        time.sleep(0.2)
-
-        # 시작일
-        input_start_date = driver.find_elements(By.XPATH, '//div[contains(@class, "date-editor")]/input')[0]
-        input_start_date.clear()
-        input_start_date.send_keys("18991130", Keys.ENTER)
-        time.sleep(0.2)
-
-        # 자체상품코드 검색 설정
-        search_type_select_list = driver.find_elements(By.XPATH, '//li[./span[contains(text(), "자체상품코드")]]')
-        for search_type_select in search_type_select_list:
-            driver.execute_script("arguments[0].click();", search_type_select)
-            time.sleep(0.2)
-            break
-
-        # 자체상품코드 입력 후 엔터 (검색버튼의 셀렉터가 약간 다름)
-        # $x('//div[./span[contains(text(), "검색항목")]]/following-sibling::div//input[not(contains(@readonly, "readonly"))]')
-        input_product_code = driver.find_element(
-            By.XPATH,
-            '//div[./span[contains(text(), "검색항목")]]/following-sibling::div//input[not(contains(@readonly, "readonly"))]',
-        )
-        input_product_code.clear()
-        input_product_code.send_keys(product_code, Keys.ENTER)
-        time.sleep(0.2)
-
-        # table에 검색 결과가 나오지 않으면 오류로 간주
-        # $x('//table[contains(@class, "table__body")]//tr')
-        try:
-            WebDriverWait(driver, 5).until(
-                EC.visibility_of_element_located((By.XPATH, '//table[contains(@class, "table__body")]//tr'))
-            )
-            time.sleep(0.5)
-
-        except Exception as e:
-            self.log_msg.emit(f"[{product_code}] 검색 결과를 발견하지 못했습니다.")
-            raise Exception(f"[{product_code}] 검색 결과를 발견하지 못했습니다.")
-
-        print(f"작업타입: {soldout_type}")
-
-        if soldout_type == "전체품절":
-            # 상품 전체 선택
-            select_all_checkbox = driver.find_element(By.XPATH, '//thead//th//input[contains(@class, "checkbox")]')
-            driver.execute_script("arguments[0].click();", select_all_checkbox)
-            time.sleep(0.2)
-
-            # 상품상태 -> 미사용
-            product_state_setting = driver.find_elements(By.XPATH, '//li[./span[contains(text(), "미사용")]]')[1]
-            driver.execute_script("arguments[0].click();", product_state_setting)
-            time.sleep(0.2)
-
-            # 선택 상품상태 변경 -> 누르면 바로 적용됩니다.
-            # update_state = driver.find_element(By.XPATH, '//button[./span[contains(text(), "선택 상품상태변경")]]')
-            # driver.execute_script("arguments[0].click();", update_state)
-            # time.sleep(0.2)
-
-            # # 정상적으로 처리되었습니다.
-            # try:
-            #     WebDriverWait(driver, 3).until(
-            #         EC.visibility_of_element_located((By.XPATH, '//p[contains(text(), "정상적으로 처리되었습니다")]'))
-            #     )
-            #     submit_message_box = driver.find_element(
-            #         By.XPATH,
-            #         '//div[@class="el-message-box"][.//p[contains(text(), "정상적으로 처리되었습니다")]]//button[./span[contains(text(), "확인")]]',
-            #     )
-            #     driver.execute_script("arguments[0].click();", submit_message_box)
-            #     time.sleep(0.2)
-
-            # except Exception as e:
-            #     self.log_msg.emit(f"{product_code}, {product_name} 선택 상품상태변경 성공 메시지를 발견하지 못했습니다.")
-            #     raise Exception(f"{product_code}, {product_name} 선택 상품상태변경 성공 메시지를 발견하지 못했습니다.")
-
-            # finally:
-            #     time.sleep(0.5)
-
-        elif soldout_type == "옵션품절":
-            print(f"{product_code} {product_name} 옵션별 수량을 작성해주세요.")
-            self.log_msg.emit(f"{product_code}, {product_name} 옵션별 수량을 작성해주세요.")
-
-        else:
-            self.log_msg.emit(f"[{soldout_type}] 품절여부 형식이 다릅니다.")
-            raise Exception(f"[{soldout_type}] 품절여부 형식이 다릅니다.")
-
     # 쇼핑몰상품수정 화면 이동
     def sabangnet_store_upload_menu(self):
         driver = self.driver
@@ -234,12 +130,12 @@ class SabangnetModifyUploadProcess:
         )
         time.sleep(1)
 
-    def store_setting(self, product_code: str, product_name: str, soldout_type: str):
+    def modify_upload(self, product_code: str, product_name: str, detail_modify: str, html_modify: str):
         driver = self.driver
 
         self.sabangnet_store_upload_menu()
 
-        print(product_code, product_name, soldout_type)
+        print(product_code, product_name, detail_modify, html_modify)
 
         # 날짜 검색 기준 -> 송신일 (기본설정됨)
         # 시작일
@@ -255,22 +151,26 @@ class SabangnetModifyUploadProcess:
             time.sleep(0.2)
 
         # 쇼핑몰(중복선택)
-        # 전체품절 -> 11번가,그립,브랜디,카카오톡스토어
-        # 옵션품절 -> 그립,브랜디,카카오톡스토어
+        # 상세이미지 수정 송신 -> 11번가,그립,브랜디,카카오톡스토어
+        # HTML 수정 송신 -> 그립,브랜디,카카오톡스토어
         # $x('//div[contains(text(), "쇼핑몰(중복선택)")]/following-sibling::div//ul/li[./span[text()="11번가"]]')
-        if soldout_type == "전체품절":
+        if detail_modify == "O" or detail_modify == "o":
+            modify_type = "detail"
+            target_store_list = [
+                StoreNameEnum.Grip.value,
+                StoreNameEnum.KakaoTalkStore.value,
+                StoreNameEnum.Coupang.value,
+            ]
+
+        elif html_modify == "O" or html_modify == "o":
+            modify_type = "html"
             target_store_list = [
                 StoreNameEnum.ElevenStreet.value,
                 StoreNameEnum.Grip.value,
-                StoreNameEnum.Brandi.value,
                 StoreNameEnum.KakaoTalkStore.value,
-            ]
-
-        elif soldout_type == "옵션품절":
-            target_store_list = [
-                StoreNameEnum.Grip.value,
                 StoreNameEnum.Brandi.value,
-                StoreNameEnum.KakaoTalkStore.value,
+                StoreNameEnum.Coupang.value,
+                StoreNameEnum.WeMakePrice.value,
             ]
 
         for target_store in target_store_list:
@@ -310,6 +210,16 @@ class SabangnetModifyUploadProcess:
         driver.execute_script("arguments[0].click();", select_all_checkbox)
         time.sleep(0.2)
 
+        # html 수정 송신의 경우 '위메프 -> 쇼핑몰별 상세설명 적용 부분 체크'
+        # 위메프는 'shop0287'로 검색됨
+        # $x('//tr[.//img[@title="shop0287"]]/td[contains(@class, "column_29")]//input[@type="checkbox"]')
+        if modify_type == "html":
+            store_detail_note_checkbox = driver.find_element(
+                By.XPATH, '//tr[.//img[@title="shop0287"]]/td[contains(@class, "column_29")]//input[@type="checkbox"]'
+            )
+            driver.execute_script("arguments[0].click();", store_detail_note_checkbox)
+            time.sleep(0.2)
+
         # 상품수정송신 -> 새 창이 열림
         regist_upload_button = driver.find_element(By.XPATH, '//button[./span[contains(text(), "상품수정송신")]]')
         driver.execute_script("arguments[0].click();", regist_upload_button)
@@ -319,7 +229,7 @@ class SabangnetModifyUploadProcess:
         print(tabs)
         try:
             driver.switch_to.window(tabs[1])
-            self.upload_regist(soldout_type)
+            self.upload_modify()
 
         except Exception as e:
             print(e)
@@ -331,36 +241,38 @@ class SabangnetModifyUploadProcess:
             driver.switch_to.window(tabs[0])
             time.sleep(0.5)
 
+        print()
+
     # 상품수정송신
-    def upload_regist(self, soldout_type: str):
+    def upload_modify(self):
         driver = self.driver
         WebDriverWait(driver, 10).until(
             EC.visibility_of_element_located((By.XPATH, '//div[./span[contains(text(), "상품수정 송신")]]'))
         )
         time.sleep(0.5)
 
-        if soldout_type == "전체품절":
-            product_state_change_radio_button = driver.find_element(
-                By.XPATH, '//tr[./td[.//strong[contains(text(), "상품의 판매상태를 수정합니다.")]]]//input[@type="radio"]'
-            )
-            driver.execute_script("arguments[0].click();", product_state_change_radio_button)
-            time.sleep(0.2)
+        # 일반항목
+        product_state_change_radio_button = driver.find_element(
+            By.XPATH, '//tr[./td[.//strong[contains(text(), "판매상태와 옵션재고수량을 제외한 항목을 수정합니다.")]]]//input[@type="radio"]'
+        )
+        driver.execute_script("arguments[0].click();", product_state_change_radio_button)
+        time.sleep(0.2)
 
-            pause_product = driver.find_element(By.XPATH, '//li[./span[contains(text(), "일시중지")]]')
-            driver.execute_script("arguments[0].click();", pause_product)
-            time.sleep(0.2)
+        # 즉시송신 버튼 클릭
+        submit_button = driver.find_element(By.XPATH, '//button[./span[contains(text(), "즉시송신")]]')
+        driver.execute_script("arguments[0].click();", submit_button)
+        time.sleep(0.2)
 
-        elif soldout_type == "옵션품절":
-            product_state_change_radio_button = driver.find_element(
-                By.XPATH,
-                '//tr[./td[.//strong[contains(text(), "사방넷에 등록된 옵션상태와 재고수량을 쇼핑몰에 반영합니다.")]]]//input[@type="radio"]',
-            )
-            driver.execute_script("arguments[0].click();", product_state_change_radio_button)
-            time.sleep(0.2)
+        # $x('//div[contains(text(), "상세설명")]')
+        WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.XPATH, '//div[contains(text(), "상세설명")]')))
+        time.sleep(0.5)
 
-            option_stock_state = driver.find_element(By.XPATH, '//li[./span[text()="기본옵션"]]')
-            driver.execute_script("arguments[0].click();", option_stock_state)
-            time.sleep(0.2)
+        # $x('//div[contains(text(), "상세설명")]/following-sibling::div//label[.//span[text()="수정함"]]//input')
+        detail_state_radio_button = driver.find_element(
+            By.XPATH, '//div[contains(text(), "상세설명")]/following-sibling::div//label[.//span[text()="수정함"]]//input'
+        )
+        driver.execute_script("arguments[0].click();", detail_state_radio_button)
+        time.sleep(0.2)
 
         print(f"즉시송신 클릭 시점")
 
@@ -381,7 +293,7 @@ class SabangnetModifyUploadProcess:
         self.log_msg.emit(f"{len(self.df_googlesheet)}개의 데이터 중 {len(self.df_product_code)}개의 자체상품코드를 발견했습니다.")
 
         try:
-            # self.sabangnet_login()
+            self.sabangnet_login()
 
             for i, row in self.df_product_code[:].iterrows():
                 try:
@@ -390,12 +302,26 @@ class SabangnetModifyUploadProcess:
                     detail_modify = str(row[ModifySheetEnum.DetailModify.value])
                     html_modify = str(row[ModifySheetEnum.HTMLModify.value])
 
+                    if detail_modify != "":
+                        pass
+                    else:
+                        detail_modify = "X"
+
+                    if html_modify != "":
+                        pass
+                    else:
+                        html_modify = "X"
+
                     print(f"{i}, {product_code}, {product_name}, {detail_modify}, {html_modify} 작업 시작")
                     self.log_msg.emit(f"{i}, {product_code}, {product_name}, {detail_modify}, {html_modify} 작업 시작")
 
                     self.sabangnet_main()
 
-                    print(f"구글 시트 적용 시점")
+                    self.modify_upload(product_code, product_name, detail_modify, html_modify)
+
+                    print(f"작업 완료")
+
+                    self.log_msg.emit(f"{i}, {product_code}, {product_name}, {detail_modify}, {html_modify} 작업 완료")
 
                 except Exception as e:
                     print(e)
