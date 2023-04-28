@@ -36,6 +36,7 @@ from common.google_sheet import get_worksheet
 class SabangnetModifyUploadProcess:
     def __init__(self):
         self.default_wait = 10
+        self.maximum_wait = 300
         self.driver: webdriver.Chrome = get_chrome_driver_new(is_headless=False, is_secret=True)
         self.driver.implicitly_wait(self.default_wait)
         self.driver.maximize_window()
@@ -48,9 +49,7 @@ class SabangnetModifyUploadProcess:
 
     # 자체상품코드가 있는 데이터만 필터링합니다.
     def get_df_product_code(self):
-        self.df_product_code = self.df_googlesheet.loc[
-            self.df_googlesheet[StockSettingSheetEnum.ProductCode.value] != ""
-        ]
+        self.df_product_code = self.df_googlesheet.loc[self.df_googlesheet[ModifySheetEnum.ProductCode.value] != ""]
         print(self.df_product_code)
 
     def sabangnet_login(self):
@@ -114,7 +113,8 @@ class SabangnetModifyUploadProcess:
         WebDriverWait(driver, 10).until(
             EC.visibility_of_element_located((By.XPATH, '//a[contains(@href, "dashboard")]'))
         )
-        time.sleep(0.5)
+        time.sleep(1)
+        close_new_tabs(driver)
 
     # 쇼핑몰상품수정 화면 이동
     def sabangnet_store_upload_menu(self):
@@ -129,6 +129,7 @@ class SabangnetModifyUploadProcess:
             )
         )
         time.sleep(1)
+        close_new_tabs(driver)
 
     def modify_upload(self, product_code: str, product_name: str, detail_modify: str, html_modify: str):
         driver = self.driver

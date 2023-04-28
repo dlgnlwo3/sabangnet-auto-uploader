@@ -36,7 +36,7 @@ from common.google_sheet import get_worksheet
 class SabangnetStockSettingProcess:
     def __init__(self):
         self.default_wait = 10
-        self.maximum_wait = 120
+        self.maximum_wait = 300
         self.driver: webdriver.Chrome = get_chrome_driver_new(is_headless=False, is_secret=True)
         self.driver.implicitly_wait(self.default_wait)
         self.driver.maximize_window()
@@ -115,7 +115,8 @@ class SabangnetStockSettingProcess:
         WebDriverWait(driver, 10).until(
             EC.visibility_of_element_located((By.XPATH, '//a[contains(@href, "dashboard")]'))
         )
-        time.sleep(0.5)
+        time.sleep(1)
+        close_new_tabs(driver)
 
     # 사방넷상품조회수정 화면 이동
     def sabangnet_stock_setting_menu(self):
@@ -130,6 +131,7 @@ class SabangnetStockSettingProcess:
             )
         )
         time.sleep(1)
+        close_new_tabs(driver)
 
     def stock_setting(self, product_code: str, product_name: str, soldout_type: str):
         driver = self.driver
@@ -234,6 +236,7 @@ class SabangnetStockSettingProcess:
             )
         )
         time.sleep(1)
+        close_new_tabs(driver)
 
     def store_setting(self, product_code: str, product_name: str, soldout_type: str):
         driver = self.driver
