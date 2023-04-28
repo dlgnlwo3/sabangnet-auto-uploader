@@ -32,7 +32,7 @@ def my_exception_hook(exctype, value, traceback):
 
 sys.excepthook = my_exception_hook
 
-# pyinstaller -n "sabangnet v0.0.2" -w --onefile --clean "main.py" --icon "assets\sb_brand_logo.ico"
+# pyinstaller -n "sabangnet v0.0.3" -w --onefile --clean "main.py" --icon "assets\sb_brand_logo.ico"
 
 
 class MainUI(QWidget):
@@ -100,7 +100,7 @@ class MainUI(QWidget):
         self.setLayout(vbox)
 
         # 앱 기본 설정
-        self.setWindowTitle(f"sabangnet v0.0.2")
+        self.setWindowTitle(f"sabangnet v0.0.3")
         self.resize(600, 600)
         self.center()
         self.show()
