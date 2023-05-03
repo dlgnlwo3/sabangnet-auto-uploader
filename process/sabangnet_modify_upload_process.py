@@ -32,6 +32,8 @@ from openpyxl import load_workbook
 
 from common.google_sheet import get_worksheet
 
+import datetime
+
 
 class SabangnetModifyUploadProcess:
     def __init__(self):
@@ -49,7 +51,16 @@ class SabangnetModifyUploadProcess:
 
     # 자체상품코드가 있는 데이터만 필터링합니다.
     def get_df_product_code(self):
-        self.df_product_code = self.df_googlesheet.loc[self.df_googlesheet[ModifySheetEnum.ProductCode.value] != ""]
+        # 엑셀에서 표기되고있는 오늘 날짜 형태
+        now = datetime.datetime.now()
+        self.today = f"{now.month}/{now.day}"
+        print(self.today)
+
+        # 자체상품코드가 있는 행, 날짜가 오늘 날짜인 행
+        self.df_product_code = self.df_googlesheet.loc[
+            (self.df_googlesheet[ModifySheetEnum.ProductCode.value] != "")
+            & self.df_googlesheet["날짜"].str.contains(self.today)
+        ]
         print(self.df_product_code)
 
     def sabangnet_login(self):
@@ -375,8 +386,10 @@ class SabangnetModifyUploadProcess:
         self.df_googlesheet = self.get_gs_data(self.guiDto.google_sheet_url, self.guiDto.selected_sheet_name)
 
         self.get_df_product_code()
-        print(f"{len(self.df_googlesheet)}개의 데이터 중 {len(self.df_product_code)}개의 자체상품코드를 발견했습니다.")
-        self.log_msg.emit(f"{len(self.df_googlesheet)}개의 데이터 중 {len(self.df_product_code)}개의 자체상품코드를 발견했습니다.")
+        print(f"{len(self.df_googlesheet)}개의 데이터 중 {self.today} 날짜에서 {len(self.df_product_code)}개의 자체상품코드를 발견했습니다.")
+        self.log_msg.emit(
+            f"{len(self.df_googlesheet)}개의 데이터 중 {self.today} 날짜에서 {len(self.df_product_code)}개의 자체상품코드를 발견했습니다."
+        )
 
         try:
             self.sabangnet_login()
