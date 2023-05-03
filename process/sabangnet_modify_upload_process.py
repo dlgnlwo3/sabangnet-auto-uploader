@@ -59,7 +59,7 @@ class SabangnetModifyUploadProcess:
         # 자체상품코드가 있는 행, 날짜가 오늘 날짜인 행
         self.df_product_code = self.df_googlesheet.loc[
             (self.df_googlesheet[ModifySheetEnum.ProductCode.value] != "")
-            & self.df_googlesheet["날짜"].str.contains(self.today)
+            & self.df_googlesheet["날짜"].str.match(self.today)
         ]
         print(self.df_product_code)
 
