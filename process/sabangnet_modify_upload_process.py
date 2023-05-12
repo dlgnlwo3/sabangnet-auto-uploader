@@ -120,7 +120,7 @@ class SabangnetModifyUploadProcess:
         driver.refresh()
         time.sleep(0.5)
         driver.get("https://sbadmin09.sabangnet.co.kr/#/dashboard")
-        time.sleep(0.5)
+        time.sleep(3)
         WebDriverWait(driver, 10).until(
             EC.visibility_of_element_located((By.XPATH, '//a[contains(@href, "dashboard")]'))
         )
@@ -133,12 +133,12 @@ class SabangnetModifyUploadProcess:
         driver.refresh()
         time.sleep(0.5)
         driver.get("https://sbadmin09.sabangnet.co.kr/#/mall/mall-product-update")
-        time.sleep(0.5)
-        WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located(
-                (By.XPATH, '//div[./span[contains(text(), "쇼핑몰상품수정")]][not(contains(@class, "scroll"))]')
-            )
-        )
+        time.sleep(3)
+        # WebDriverWait(driver, 10).until(
+        #     EC.visibility_of_element_located(
+        #         (By.XPATH, '//div[./span[contains(text(), "쇼핑몰상품수정")]][not(contains(@class, "scroll"))]')
+        #     )
+        # )
         time.sleep(1)
         close_new_tabs(driver)
 

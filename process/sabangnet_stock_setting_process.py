@@ -111,10 +111,10 @@ class SabangnetStockSettingProcess:
         driver.refresh()
         time.sleep(0.5)
         driver.get("https://sbadmin09.sabangnet.co.kr/#/dashboard")
-        time.sleep(0.5)
-        WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located((By.XPATH, '//a[contains(@href, "dashboard")]'))
-        )
+        time.sleep(3)
+        # WebDriverWait(driver, 10).until(
+        #     EC.visibility_of_element_located((By.XPATH, '//a[contains(@href, "dashboard")]'))
+        # )
         time.sleep(1)
         close_new_tabs(driver)
 
@@ -124,12 +124,16 @@ class SabangnetStockSettingProcess:
         driver.refresh()
         time.sleep(0.5)
         driver.get("https://sbadmin09.sabangnet.co.kr/#/product/product-inquiry")
-        time.sleep(0.5)
-        WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located(
-                (By.XPATH, '//div[./span[contains(text(), "사방넷상품조회수정")]][not(contains(@class, "scroll"))]')
-            )
-        )
+        time.sleep(3)
+        # try:
+        #     WebDriverWait(driver, 10).until(
+        #         EC.visibility_of_element_located(
+        #             (By.XPATH, '//div[./span[contains(text(), "사방넷상품조회수정")]][not(contains(@class, "scroll"))]')
+        #         )
+        #     )
+        # except Exception as e:
+        #     print(e)
+        #     raise Exception("사방넷상품조회수정 확인 실패")
         time.sleep(1)
         close_new_tabs(driver)
 
@@ -229,12 +233,12 @@ class SabangnetStockSettingProcess:
         driver.refresh()
         time.sleep(0.5)
         driver.get("https://sbadmin09.sabangnet.co.kr/#/mall/mall-product-update")
-        time.sleep(0.5)
-        WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located(
-                (By.XPATH, '//div[./span[contains(text(), "쇼핑몰상품수정")]][not(contains(@class, "scroll"))]')
-            )
-        )
+        time.sleep(3)
+        # WebDriverWait(driver, 10).until(
+        #     EC.visibility_of_element_located(
+        #         (By.XPATH, '//div[./span[contains(text(), "쇼핑몰상품수정")]][not(contains(@class, "scroll"))]')
+        #     )
+        # )
         time.sleep(1)
         close_new_tabs(driver)
 
@@ -501,7 +505,7 @@ class SabangnetStockSettingProcess:
                     self.log_msg.emit(f"{i}, {product_code}, {product_name}, {soldout_type} 작업 완료")
 
                 except Exception as e:
-                    print(e)
+                    print(str(e))
                     self.log_msg.emit(f"{i}, {product_code}, {product_name}, {soldout_type} 작업 실패")
                     continue
 
